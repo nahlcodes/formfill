@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'">
+<title>FormFill</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#14161a;--muted:#626874;--border:#e3e6ea;--accent:#0f6b63;--accent-t:#fff;--danger:#b42318}
+[data-theme=dark]{--bg:#0f1114;--card:#171a1f;--text:#eceef1;--muted:#9aa1ad;--border:#292d34;--accent:#4fd1c0;--accent-t:#06211d;--danger:#ff8a80}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:clamp(20px,5vw,52px) clamp(16px,4vw,24px) 36px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:1.65rem;font-weight:750;letter-spacing:-.03em;line-height:1.2}
+.sub{margin:2px 0 0;color:var(--muted);font-size:.95rem}
+.btn{font:inherit;font-size:.9rem;font-weight:550;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible,.in:focus-visible,.mi:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:default}
+.primary{background:var(--accent);color:var(--accent-t);border-color:transparent}
+.primary:hover{border-color:transparent;filter:brightness(1.08)}
+.sm{min-height:36px;padding:0 12px;font-size:.85rem}
+.ok{border-color:var(--accent);color:var(--accent)}
+.danger{border-color:var(--danger);color:var(--danger);font-weight:650}
+.menuwrap{position:relative;flex-shrink:0}
+.menu{position:absolute;right:0;top:46px;z-index:5;min-width:200px;padding:6px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.14)}
+.mi{display:block;width:100%;text-align:left;font:inherit;font-size:.9rem;padding:10px 12px;border:0;border-radius:8px;background:none;color:var(--text);cursor:pointer}
+.mi:hover{background:var(--bg)}
+.dng{color:var(--danger)}
+.menu hr{border:0;border-top:1px solid var(--border);margin:6px 0}
+.hero{text-align:center;padding:clamp(56px,14vh,120px) 0 24px}
+.hero h2{margin:0 0 10px;font-size:clamp(1.6rem,5vw,2.2rem);letter-spacing:-.03em;line-height:1.2}
+.hero p{margin:0 auto 26px;color:var(--muted);max-width:32ch}
+.hero .btn.primary{min-height:48px;padding:0 26px;font-size:1rem}
+.link{display:block;margin:18px auto 0;background:none;border:0;color:var(--muted);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer;padding:8px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 0}
+.search{flex:1 1 100%;position:relative}
+.search .in{padding:11px 62px 11px 14px;border-radius:12px;background:var(--card);-webkit-appearance:none;appearance:none}
+#q::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+kbd{position:absolute;right:12px;top:50%;transform:translateY(-50%);font:.72rem ui-monospace,Menlo,Consolas,monospace;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:1px 6px;pointer-events:none}
+.tools .btn{flex:1 1 auto}
+h3.sec{margin:30px 0 10px;font-size:.75rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.rows{display:grid;gap:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px 12px 16px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.info{min-width:0;flex:1}
+.lbl{font-size:.76rem;color:var(--muted);font-weight:550;overflow-wrap:anywhere}
+.val{overflow-wrap:anywhere;white-space:pre-wrap}
+.val.empty{color:var(--muted);font-style:italic}
+.acts{display:flex;gap:6px;flex-shrink:0}
+.in{width:100%;font:inherit;font-size:16px;padding:8px 10px;margin-top:3px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+.in:focus{border-color:var(--accent)}
+.none,.hint{color:var(--muted);text-align:center;font-size:.9rem;margin:32px 0}
+.hint{margin:22px 0 0}
+footer{margin-top:40px;text-align:center;color:var(--muted);font-size:.8rem}
+footer div+div{margin-top:2px;font-size:.75rem}
+dialog{border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text);padding:22px;width:min(440px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h3{margin:0 0 8px;font-size:1.1rem}
+dialog p{margin:0 0 14px;color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+dialog label{display:block;margin-top:12px;font-size:.8rem;font-weight:550;color:var(--muted)}
+.err{color:var(--danger);min-height:1.4em;margin:8px 0 0!important;font-size:.85rem}
+.dact{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,10px);max-width:calc(100vw - 32px);padding:10px 16px;border-radius:999px;background:var(--text);color:var(--bg);font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.cagrp{display:flex;align-items:flex-end;gap:8px;flex:2 1 260px}
+#copyAll{flex:1 1 auto}
+.fmt{display:flex;flex-direction:column;gap:2px;font-size:.7rem;font-weight:550;color:var(--muted);min-width:0}
+.fmt select{font:inherit;font-size:.85rem;color:var(--text);min-height:40px;padding:0 8px;border:1px solid var(--border);border-radius:10px;background:var(--card);cursor:pointer;max-width:100%}
+.fmt select:focus-visible,.grip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grip{flex-shrink:0;align-self:stretch;min-width:30px;margin:-4px 0 -4px -10px;padding:0 6px;border:0;border-radius:8px;background:none;color:var(--muted);font:inherit;font-size:1.05rem;letter-spacing:-.15em;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.grip:hover{color:var(--text);background:var(--bg)}
+.row.drag{position:relative;z-index:1;border-color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+body.dragging,body.dragging *{user-select:none;-webkit-user-select:none;cursor:grabbing!important}
+@media (max-width:520px){.row{flex-wrap:wrap}.acts{width:100%}.acts .btn{flex:1}.tools .btn{flex:1 1 45%}.cagrp{flex-basis:100%}.fmt{flex:1 1 0}.fmt select{width:100%}#copyAll{flex:1 1 0}kbd{display:none}.search .in{padding-right:14px}}
+@media (pointer:coarse){.grip{min-width:44px}.fmt select{font-size:16px;min-height:44px}.btn{min-height:44px}.sm{min-height:44px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>FormFill</h1>
+      <p class="sub">Stop typing the same information into every form.</p>
+    </div>
+    <div class="menuwrap">
+      <button class="btn" id="menuBtn" data-a="menu" aria-haspopup="true" aria-expanded="false" aria-controls="menu">Settings</button>
+      <div class="menu" id="menu" hidden>
+        <button class="mi" data-a="export">Export Profile</button>
+        <button class="mi" data-a="import">Import Profile</button>
+        <button class="mi" id="themeBtn" data-a="theme">Dark mode</button>
+        <hr>
+        <button class="mi dng" data-a="clear">Clear All Data</button>
+      </div>
+    </div>
+  </header>
+  <main id="main"></main>
+  <footer><div>🔒 Stored locally in this browser on this device</div><div>Not encrypted. Clearing browser data deletes it, so export a backup.</div></footer>
+</div>
+<input type="file" id="file" accept=".json,application/json" hidden>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+const SECTIONS=[
+['Personal',[['fullName','Full Name'],['preferredName','Preferred Name'],['dob','Date of Birth'],['email','Email'],['phone','Phone']]],
+['Address',[['address','Address'],['city','City'],['state','State / Province'],['country','Country'],['postal','Postal Code']]],
+['Education',[['school','School / University'],['grade','Grade / Year'],['gradYear','Graduation Year'],['studentId','Student ID']]],
+['Family / Emergency',[['guardianName','Parent / Guardian Name'],['guardianEmail','Parent / Guardian Email'],['guardianPhone','Parent / Guardian Phone'],['emName','Emergency Contact Name'],['emPhone','Emergency Contact Phone']]]];
+const KEY='formfill.v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'c_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36);
+const dlg=$('#dlg');
+const FIELDS=Object.fromEntries(SECTIONS.flatMap(([,fs])=>fs));
+const FMTS=['inline','split','value'];
+function secKeys(t){const def=SECTIONS.find(x=>x[0]===t)[1].map(f=>f[0]);return[...new Set([...(S.order[t]||[]).filter(k=>def.includes(k)),...def])]}
+function fmtText(f){
+  if(S.fmt==='split')return f.map(x=>x.label+'\n'+x.value).join('\n\n');
+  if(S.fmt==='value')return f.map(x=>x.value).join('\n');
+  return f.map(x=>x.label+': '+x.value).join('\n');
+}
+let S={profile:{},custom:[],started:false,theme:'light',editAll:false,editKey:null,q:'',order:{},fmt:'inline'};
+let pend=null,warned=false,tt;
+
+function clean(d){
+  const p={};
+  if(d&&d.profile&&typeof d.profile==='object')for(const[,fs]of SECTIONS)for(const[k]of fs){const v=d.profile[k];if(typeof v==='string'&&v.trim())p[k]=v}
+  const c=Array.isArray(d&&d.custom)?d.custom.filter(f=>f&&typeof f.name==='string'&&f.name.trim()&&typeof f.value==='string').map(f=>({id:uid(),name:f.name.trim(),value:f.value})):[];
+  const order={},o=d&&d.order&&typeof d.order==='object'?d.order:{};
+  for(const[t,fs]of SECTIONS){const a=o[t];if(Array.isArray(a)){const ks=fs.map(f=>f[0]);order[t]=[...new Set(a.filter(k=>ks.includes(k)))]}}
+  return{profile:p,custom:c,order,fmt:FMTS.includes(d&&d.copyFormat)?d.copyFormat:'inline'};
+}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(d){const c=clean(d);S.profile=c.profile;S.custom=c.custom;S.order=c.order;S.fmt=c.fmt;S.started=!!d.started;S.theme=d.theme==='dark'?'dark':'light'}}catch(e){}
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify({profile:S.profile,custom:S.custom,order:S.order,copyFormat:S.fmt,started:S.started,theme:S.theme}))}
+  catch(e){if(!warned){warned=true;toast('Browser storage is unavailable, so changes won’t persist. Use Export to keep a copy.',4000)}}
+}
+const hasData=()=>Object.keys(S.profile).length>0||S.custom.length>0;
+function all(){
+  const out=[];
+  for(const[t]of SECTIONS)for(const k of secKeys(t))if(S.profile[k])out.push({id:k,label:FIELDS[k],value:S.profile[k]});
+  for(const f of S.custom)if(f.value)out.push({id:f.id,label:f.name,value:f.value});
+  return out;
+}
+function getVal(id){return id.startsWith('c_')?(S.custom.find(f=>f.id===id)||{}).value:S.profile[id]}
+function toast(m,ms=2000){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms)}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){
+    const prev=document.activeElement,a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0;top:0;font-size:16px';document.body.appendChild(a);a.select();a.setSelectionRange(0,t.length);
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}a.remove();if(prev&&prev.focus)prev.focus();return ok}
+}
+
+/* ---------- rendering ---------- */
+function render(){
+  document.documentElement.dataset.theme=S.theme;
+  $('#themeBtn').textContent=S.theme==='dark'?'Light mode':'Dark mode';
+  const m=$('#main');
+  if(!(S.started||hasData())){
+    m.innerHTML=`<section class="hero"><h2>Your profile, ready when you are.</h2><p>Add your information once. Copy it whenever you need it.</p><button class="btn primary" data-a="create">Create Profile</button><button class="link" data-a="import">or import a saved profile</button></section>`;
+    return;
+  }
+  m.innerHTML=`<div class="tools">
+    <div class="search"><label for="q" class="sr" style="position:absolute;left:-9999px">Search fields</label><input class="in" id="q" type="search" placeholder="Search fields..." autocomplete="off" value="${esc(S.q)}"><kbd aria-hidden="true">${/Mac|iPhone|iPad/.test(navigator.platform)?'⌘K':'Ctrl K'}</kbd></div>
+    <div class="cagrp"><button class="btn primary" id="copyAll" data-a="copyAll">Copy All</button><label class="fmt">Copy format<select id="fmt"><option value="inline"${S.fmt==='inline'?' selected':''}>Label: Value</option><option value="split"${S.fmt==='split'?' selected':''}>Label + Value</option><option value="value"${S.fmt==='value'?' selected':''}>Value only</option></select></label></div>
+    <button class="btn" data-a="add">+ Add Field</button>
+    <button class="btn" data-a="toggleEdit">${S.editAll?'Save Changes':'Edit Profile'}</button>
+  </div><div id="list"></div>`;
+  renderList();
+}
+function row(id,label,val,custom){
+  const ed=!custom&&(S.editAll||S.editKey===id);
+  let info,acts='';
+  const grip=S.editAll&&!S.q.trim()?`<button class="grip" type="button" title="Drag to reorder" aria-label="Reorder ${esc(label)}. Drag, or use the up and down arrow keys.">⋮⋮</button>`:'';
+  if(ed){
+    info=`<label class="lbl" for="f-${id}">${esc(label)}</label><input class="in" id="f-${id}" data-k="${id}" value="${esc(val)}" autocomplete="off">`;
+    if(S.editKey===id&&!S.editAll)acts=`<button class="btn sm" data-a="done">Done</button>`;
+  }else{
+    info=`<div class="lbl">${esc(label)}</div><div class="val${val?'':' empty'}">${val?esc(val):'Not set'}</div>`;
+    if(val)acts+=`<button class="btn sm" data-a="copy" data-id="${id}">Copy</button>`;
+    acts+=custom?`<button class="btn sm" data-a="editc" data-id="${id}" aria-label="Edit ${esc(label)}">Edit</button><button class="btn sm" data-a="delc" data-id="${id}" aria-label="Delete ${esc(label)}">Delete</button>`
+      :(S.editKey?'':`<button class="btn sm" data-a="edit" data-id="${id}" aria-label="Edit ${esc(label)}">Edit</button>`);
+  }
+  return `<div class="row" data-id="${id}">${grip}<div class="info">${info}</div>${acts?`<div class="acts">${acts}</div>`:''}</div>`;
+}
+function renderList(){
+  const q=S.q.trim().toLowerCase();let html='',n=0;
+  const sec=(t,r)=>`<h3 class="sec">${esc(t)}</h3><div class="rows" data-sec="${esc(t)}">${r}</div>`;
+  const hit=(l,v)=>!q||(l+' '+v).toLowerCase().includes(q);
+  for(const[t,fs]of SECTIONS){
+    let r='';
+    for(const k of secKeys(t)){const l=FIELDS[k],v=S.profile[k]||'';if(!(S.editAll||S.editKey===k||v))continue;if(!hit(l,v))continue;r+=row(k,l,v,false);n++}
+    if(r)html+=sec(t,r);
+  }
+  let r='';
+  for(const f of S.custom){if(!hit(f.name,f.value))continue;r+=row(f.id,f.name,f.value,true);n++}
+  if(r)html+=sec('Custom',r);
+  if(!n)html=`<p class="none">${q?'No fields match “'+esc(S.q)+'”.':'Nothing here yet. Choose Edit Profile to add your information, or + Add Field for your own.'}</p>`;
+  else if(S.editAll)html+=`<p class="hint">Changes save automatically. ${q?'Clear the search to reorder fields.':'Drag ⋮⋮ to reorder within a section.'}</p>`;
+  $('#list').innerHTML=html;
+  updateCA();
+}
+function updateCA(){const b=$('#copyAll');if(b)b.disabled=!all().length}
+
+/* ---------- dialogs ---------- */
+function openDlg(h){dlg.innerHTML=h;if(!dlg.open)dlg.showModal()}
+function confirmD(title,msg,label,fn,danger){
+  pend=fn;
+  openDlg(`<h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="dact"><button class="btn" data-a="close"${danger?' autofocus':''}>Cancel</button><button class="btn ${danger?'danger':'primary'}" data-a="ok"${danger?'':' autofocus'}>${esc(label)}</button></div>`);
+}
+function fieldDlg(id){
+  const f=id&&S.custom.find(x=>x.id===id);
+  openDlg(`<h3>${f?'Edit field':'Add field'}</h3>
+  <label for="fn">Field name</label><input class="in" id="fn" maxlength="80" placeholder="e.g. LinkedIn" autocomplete="off" value="${f?esc(f.name):''}" autofocus>
+  <label for="fv">Value</label><input class="in" id="fv" placeholder="e.g. linkedin.com/in/yourname" autocomplete="off" value="${f?esc(f.value):''}">
+  <p class="err" id="err" role="alert"></p>
+  <div class="dact"><button class="btn" data-a="close">Cancel</button><button class="btn primary" data-a="saveField" data-id="${f?f.id:''}">Save</button></div>`);
+}
+
+/* ---------- export / import / clear ---------- */
+function exportP(){
+  if(!hasData()){toast('Nothing to export yet.');return}
+  const d={app:'FormFill',version:2,exported:new Date().toISOString(),profile:S.profile,custom:S.custom.map(({name,value})=>({name,value})),order:Object.fromEntries(SECTIONS.map(([t])=>[t,secKeys(t)])),copyFormat:S.fmt};
+  const u=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=u;a.download='formfill-profile.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),1500);toast('Exported formfill-profile.json (plain text, not encrypted)',3500);
+}
+function applyImport(c){
+  S.profile=c.profile;S.custom=c.custom;S.order=c.order;S.fmt=c.fmt;S.started=true;S.editAll=false;S.editKey=null;S.q='';
+  save();render();toast('Profile imported');
+}
+$('#file').addEventListener('change',e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const r=new FileReader();
+  if(f.size>2e6){toast('That file is too large to be a FormFill profile.',3000);return}
+  r.onerror=()=>toast('Could not read that file.');
+  r.onload=()=>{
+    let d;try{d=JSON.parse(r.result)}catch(_){toast('That file isn’t valid JSON.',3000);return}
+    if(!d||typeof d!=='object'||((d.app&&d.app!=='FormFill')||(!d.profile&&!Array.isArray(d.custom)))){toast('That doesn’t look like a FormFill profile.',3000);return}
+    const c=clean(d),n=Object.keys(c.profile).length+c.custom.length;
+    if(!n){toast('No usable fields found in that file.',3000);return}
+    if(hasData())confirmD('Replace your current profile?',`Importing will overwrite everything you have now with ${n} field${n===1?'':'s'} from this file. This can’t be undone.`,'Replace profile',()=>applyImport(c),true);
+    else applyImport(c);
+  };
+  r.readAsText(f);
+});
+
+/* ---------- menu ---------- */
+const menuOpen=()=>!$('#menu').hidden;
+function closeMenu(){$('#menu').hidden=true;$('#menuBtn').setAttribute('aria-expanded','false')}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+  if(e.target===dlg){const b=dlg.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)dlg.close();return}
+  if(!e.target.closest('.menuwrap'))closeMenu();
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const a=b.dataset.a,id=b.dataset.id;
+  if(a!=='menu')closeMenu();
+  switch(a){
+    case'menu':{const m=$('#menu');m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));if(!m.hidden)m.querySelector('.mi').focus();break}
+    case'create':S.started=true;S.editAll=true;save();render();{const i=$('#list .in');if(i)i.focus()}break;
+    case'copy':{
+      const v=getVal(id);if(!v)break;
+      if(await copyText(v)){b.textContent='Copied ✓';b.classList.add('ok');clearTimeout(b._t);b._t=setTimeout(()=>{b.textContent='Copy';b.classList.remove('ok')},1500)}
+      else toast('Copy failed. Select the text and copy it manually.',3000);
+      break}
+    case'copyAll':{
+      const f=all();if(!f.length)break;
+      if(await copyText(fmtText(f)))toast(`Copied ${f.length} field${f.length===1?'':'s'}`);
+      else toast('Copy failed. Try again or copy fields one by one.',3000);
+      break}
+    case'edit':S.editKey=id;renderList();{const i=document.getElementById('f-'+id);if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}break;
+    case'done':S.editKey=null;renderList();break;
+    case'toggleEdit':S.editAll=!S.editAll;S.editKey=null;render();if(S.editAll){const i=$('#list .in');if(i)i.focus()}else toast('Changes saved');break;
+    case'add':fieldDlg();break;
+    case'editc':fieldDlg(id);break;
+    case'delc':{const f=S.custom.find(x=>x.id===id);if(f)confirmD('Delete this field?',`“${f.name}” will be removed from your profile.`,'Delete',()=>{S.custom=S.custom.filter(x=>x.id!==id);save();renderList();toast('Field deleted')},true);break}
+    case'saveField':{
+      const n=$('#fn').value.trim(),v=$('#fv').value;
+      if(!n){$('#err').textContent='Give the field a name.';$('#fn').focus();break}
+      if(id){const f=S.custom.find(x=>x.id===id);if(f){f.name=n;f.value=v}}else S.custom.push({id:uid(),name:n,value:v});
+      S.started=true;save();dlg.close();renderList();toast(id?'Field updated':'Field added');break}
+    case'close':dlg.close();break;
+    case'ok':{const f=pend;pend=null;dlg.close();if(f)f();break}
+    case'export':exportP();break;
+    case'import':$('#file').click();break;
+    case'theme':S.theme=S.theme==='dark'?'light':'dark';save();render();break;
+    case'clear':confirmD('Clear all data?','This permanently deletes your profile and custom fields from this device. Export first if you want a backup.','Clear all data',()=>{S.profile={};S.custom=[];S.order={};S.started=false;S.editAll=false;S.editKey=null;S.q='';save();render();toast('All data cleared')},true);break;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='q'){S.q=t.value;renderList()}
+  else if(t.dataset&&t.dataset.k){const v=t.value;if(v.trim())S.profile[t.dataset.k]=v;else delete S.profile[t.dataset.k];save();updateCA()}
+});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='k'){
+    const q=$('#q');if(q&&!dlg.open){e.preventDefault();q.focus();q.select()}return}
+  if(e.key==='Escape'){
+    if(menuOpen()){closeMenu();$('#menuBtn').focus()}
+    else if(e.target.id==='q'&&S.q){S.q='';e.target.value='';renderList()}
+    return}
+  if(e.key==='Enter'){
+    const t=e.target;
+    if(t.dataset&&t.dataset.k&&S.editKey&&!S.editAll){S.editKey=null;renderList()}
+    else if(t.id==='fn'||t.id==='fv'){const s=dlg.querySelector('[data-a=saveField]');if(s)s.click()}
+  }
+});
+
+document.addEventListener('change',e=>{if(e.target.id==='fmt'&&FMTS.includes(e.target.value)){S.fmt=e.target.value;save()}});
+
+/* ---------- reordering (pointer events: mouse, touch and pen; arrow keys on the handle) ---------- */
+let D=null;
+function reorder(){
+  for(const s of [...D.box.children]){
+    if(s===D.row)continue;const b=s.getBoundingClientRect(),mid=b.top+b.height/2;
+    const after=D.row.compareDocumentPosition(s)&Node.DOCUMENT_POSITION_FOLLOWING;
+    if(after&&D.y>mid)s.after(D.row);else if(!after&&D.y<mid)s.before(D.row);
+  }
+}
+function tick(){if(!D)return;if(D.y<70)scrollBy(0,-12);else if(D.y>innerHeight-70)scrollBy(0,12);reorder();D.raf=requestAnimationFrame(tick)}
+function commit(box){
+  const ids=[...box.children].map(r=>r.dataset.id),sec=box.dataset.sec,uniq=new Set(ids).size===ids.length;
+  if(sec==='Custom'){const m=new Map(S.custom.map(f=>[f.id,f]));if(uniq&&ids.length===m.size&&ids.every(i=>m.has(i)))S.custom=ids.map(i=>m.get(i))}
+  else{const cur=secKeys(sec);if(uniq&&ids.length===cur.length&&ids.every(i=>cur.includes(i)))S.order[sec]=ids}
+  save();renderList();
+}
+document.addEventListener('pointerdown',e=>{
+  const g=e.target.closest&&e.target.closest('.grip');if(!g||D||e.button>0)return;
+  e.preventDefault();const row=g.closest('.row');
+  D={row,box:row.parentNode,g,pid:e.pointerId,y:e.clientY};
+  try{g.setPointerCapture(e.pointerId)}catch(_){}
+  row.classList.add('drag');document.body.classList.add('dragging');D.raf=requestAnimationFrame(tick);
+});
+document.addEventListener('pointermove',e=>{if(!D||e.pointerId!==D.pid)return;e.preventDefault();D.y=e.clientY;reorder()});
+function endDrag(e,cancel){
+  if(!D||e.pointerId!==D.pid)return;const d=D;D=null;cancelAnimationFrame(d.raf);
+  d.row.classList.remove('drag');document.body.classList.remove('dragging');
+  try{d.g.releasePointerCapture(d.pid)}catch(_){}
+  if(cancel)renderList();else commit(d.box);
+}
+document.addEventListener('pointerup',e=>endDrag(e,false));
+document.addEventListener('pointercancel',e=>endDrag(e,true));
+document.addEventListener('keydown',e=>{
+  const g=e.target.classList&&e.target.classList.contains('grip')?e.target:null;
+  if(!g||(e.key!=='ArrowUp'&&e.key!=='ArrowDown'))return;
+  e.preventDefault();const row=g.closest('.row'),box=row.parentNode,sib=e.key==='ArrowUp'?row.previousElementSibling:row.nextElementSibling;
+  if(!sib)return;e.key==='ArrowUp'?sib.before(row):sib.after(row);commit(box);
+  const n=document.querySelector(`.row[data-id="${row.dataset.id}"] .grip`);if(n)n.focus();
+});
+
+load();render();
+</script>
+</body>
+</html>
